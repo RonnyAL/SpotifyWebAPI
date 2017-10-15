@@ -1,8 +1,8 @@
-import eg
+import eg, wx
 
 eg.RegisterPlugin(
     name = "Spotify Web API",
-    author = "Sept1k and yokel22",
+    author = "Septik and yokel22",
     version = "0.1",
     kind = "other",
     description = "This plugin uses the Spotify Web API to perform various actions in Spotify.",
@@ -221,7 +221,7 @@ class AddToPlaylist(eg.ActionBase):
         parsed_json = json.loads(json_string)
 
         access_token = parsed_json['access_token']
-        eg.plugins.Webserver.SetPersistentValue(u'spotify_access_token', str(newtoken), False, False)
+        eg.plugins.Webserver.SetPersistentValue(u'spotify_access_token', str(access_token), False, False)
         
         return access_token
         
