@@ -5,22 +5,32 @@ eg.RegisterPlugin(
     author="Septik and yokel22",
     version="0.1",
     kind="other",
-    description="This plugin uses the Spotify Web API to perform various actions in Spotify.",
+    description=(
+        "This plugin uses the Spotify Web API to perform various actions in "
+        "Spotify."
+    ),
     icon=(
-        "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACNElEQVR42o2TbUhTYRTHfzc3bcuX"
-        "EndpiUVvlIRIGjmHFUVFQRALhLIXpCIIghAbfpCiD6OwEX3pQ0ERBAq94IcIAitJwpJwZmVFqdnE"
-        "QiWLLNfUuXXu7tQZd+GBh3Pufc7zP+f8n/+jkMCOnEdNtrBci8dH6b5WxaBRnvLvjwuP2ZdkolLC"
-        "grj9iCxfeAKvewu3DQGO1jA310GthHv4v93pbOPQlQqCMwAuNlEvzsXs7G7lJkqnAGoeUWYyUxsa"
-        "gy9d8K0PAr9kU3at6ZCVDXZhw5w8jRAOs9e9mVtKrHpbJMLas1L/9w/9oCVVfBL8ESCZHZMcXr0e"
-        "SmTAlYVRDJ90sU7Zf5qFBVv5qnXT3a5XtOXIAfNUpWhHnT5obYDed3DiMizNI/K+BbtS7sGZt4Fm"
-        "LbnnDTTWQX8PjPzUQTJskLMK1pRAbhEM9oK6GOZId10vcWoAxQLwTAPwC/qn15C9AuZlwEQIvvfD"
-        "5w549QRSLHDMC5l2vTsBKFbKqrEVbmdAGyE0Dh1PYcAvJA7rVearsCwfFgmJ7Y3Cg0PA03VtvG1G"
-        "nSSxRVzR8JCMIEpQl0DqAp28IWHnwwsIjsCBM3r7MXsuJDqjAOce4EqxRnWQ0Po+QlqmcJKlf8uV"
-        "767axr14Id0Ud3CWQroh1Q/PUGKpG7NjF1clLDd6I3Fv4rrvIcfrPIQwSvTcZ4cljVMSbpQVUwNC"
-        "L03BAN7qnTTE5yeqhOskVrk2jTJlbBR//SUCRnl/AbtOpXRdoA/cAAAAAElFTkSuQmCC"),
+        "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACNElEQVR42o2TbUhTYRTHf"
+        "zc3bcuXEndpiUVvlIRIGjmHFUVFQRALhLIXpCIIghAbfpCiD6OwEX3pQ0ERBAq94IcIAi"
+        "tJwpJwZmVFqdnEQiWLLNfUuXXu7tQZd+GBh3Pufc7zP+f8n/+jkMCOnEdNtrBci8dH6b5"
+        "WxaBRnvLvjwuP2ZdkolLCgrj9iCxfeAKvewu3DQGO1jA310GthHv4v93pbOPQlQqCMwAu"
+        "NlEvzsXs7G7lJkqnAGoeUWYyUxsagy9d8K0PAr9kU3at6ZCVDXZhw5w8jRAOs9e9mVtKr"
+        "HpbJMLas1L/9w/9oCVVfBL8ESCZHZMcXr0eSmTAlYVRDJ90sU7Zf5qFBVv5qnXT3a5XtO"
+        "XIAfNUpWhHnT5obYDed3DiMizNI/K+BbtS7sGZt4FmLbnnDTTWQX8PjPzUQTJskLMK1pR"
+        "AbhEM9oK6GOZId10vcWoAxQLwTAPwC/qn15C9AuZlwEQIvvfD5w549QRSLHDMC5l2vTsB"
+        "KFbKqrEVbmdAGyE0Dh1PYcAvJA7rVearsCwfFgmJ7Y3Cg0PA03VtvG1GnSSxRVzR8JCMI"
+        "EpQl0DqAp28IWHnwwsIjsCBM3r7MXsuJDqjAOce4EqxRnWQ0Po+QlqmcJKlf8uV767axr"
+        "14Id0Ud3CWQroh1Q/PUGKpG7NjF1clLDd6I3Fv4rrvIcfrPIQwSvTcZ4cljVMSbpQVUwN"
+        "CL03BAN7qnTTE5yeqhOskVrk2jTJlbBR//SUCRnl/AbtOpXRdoA/cAAAAAElFTkSuQmCC"
+    ),
 )
 
-import json, base64, requests, os, time, threading
+import json # NOQA
+import base64 # NOQA
+import requests # NOQA
+import os # NOQA
+import time # NOQA
+import threading # NOQA
 
 
 class SpotifyWebAPI(eg.PluginBase):
@@ -31,11 +41,20 @@ class SpotifyWebAPI(eg.PluginBase):
         self.AddAction(PrintUserName)
         self.AddAction(AddToPlaylist)
         self.AddAction(getFirstAccessToken)
-        playbackGroup = self.AddGroup(name="Playback actions", description="Actions related to playback.")
+        playbackGroup = self.AddGroup(
+            name="Playback actions",
+            description="Actions related to playback."
+        )
         playbackGroup.AddAction(PauseMusic)
         playbackGroup.AddAction(PlayMusic)
-        self.access_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_access_token', False)
-        self.refresh_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_refresh_token', False)
+        self.access_token = eg.plugins.Webserver.GetPersistentValue(
+            u'spotify_access_token',
+            False
+        )
+        self.refresh_token = eg.plugins.Webserver.GetPersistentValue(
+            u'spotify_refresh_token',
+            False
+        )
 
     def Configure(
             self,
@@ -96,7 +115,10 @@ class PauseMusic(eg.ActionBase):
         access_token = self.plugin.access_token
         refresh_token = self.plugin.refresh_token
         if access_token is None:
-            access_token = AddToPlaylist.refreshAccessToken(AddToPlaylist(), refresh_token)
+            access_token = AddToPlaylist.refreshAccessToken(
+                AddToPlaylist(),
+                refresh_token
+            )
         url = 'https://api.spotify.com/v1/me/player/pause'
         headers = {"Authorization": "Bearer " + access_token}
 
@@ -111,8 +133,14 @@ class PlayMusic(eg.ActionBase):
         access_token = self.plugin.access_token
         refresh_token = self.plugin.refresh_token
         if access_token is None:
-            access_token = AddToPlaylist.refreshAccessToken(AddToPlaylist(), refresh_token)
-        access_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_access_token', False)
+            access_token = AddToPlaylist.refreshAccessToken(
+                AddToPlaylist(),
+                refresh_token
+            )
+        access_token = eg.plugins.Webserver.GetPersistentValue(
+            u'spotify_access_token',
+            False
+        )
         url = 'https://api.spotify.com/v1/me/player/play'
         headers = {"Authorization": "Bearer " + access_token}
 
@@ -125,21 +153,34 @@ class AddToPlaylist(eg.ActionBase):
 
     def __call__(self, playlistID):
         userName = self.plugin.userName
-        access_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_access_token', False)
-        refresh_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_refresh_token', False)
+        access_token = eg.plugins.Webserver.GetPersistentValue(
+            u'spotify_access_token',
+            False
+        )
+        refresh_token = eg.plugins.Webserver.GetPersistentValue(
+            u'spotify_refresh_token',
+            False
+        )
 
         if access_token is None:
             self.PrintError("No access token found.")
             access_token = self.refreshAccessToken(refresh_token)
 
-        trackInfo = requests.get("https://api.spotify.com/v1/me/player/currently-playing",
-                                 headers={"Authorization": "Bearer " + access_token})
+        trackInfo = requests.get(
+            "https://api.spotify.com/v1/me/player/currently-playing",
+            headers={"Authorization": "Bearer " + access_token}
+        )
 
         if trackInfo.status_code == 401:
             self.refreshAccessToken(self.refresh_token)
-            access_token = eg.plugins.Webserver.GetPersistentValue(u'spotify_access_token', False)
-            trackInfo = requests.get("https://api.spotify.com/v1/me/player/currently-playing",
-                                     headers={"Authorization": "Bearer " + access_token})
+            access_token = eg.plugins.Webserver.GetPersistentValue(
+                u'spotify_access_token',
+                False
+            )
+            trackInfo = requests.get(
+                "https://api.spotify.com/v1/me/player/currently-playing",
+                headers={"Authorization": "Bearer " + access_token}
+            )
 
         if trackInfo.status_code == 204:
             self.PrintError("No track info found!")
@@ -153,15 +194,32 @@ class AddToPlaylist(eg.ActionBase):
 
         # Get playlist info
         tracklist = requests.get(
-            "https://api.spotify.com/v1/users/" + userName + "/playlists/" + playlistID + "/tracks?fields=items(track.id),total",
-            headers={"Accept": "application/json", "Authorization": "Bearer " + access_token + "\""})
+            (
+                "https://api.spotify.com/v1/users/" +
+                userName +
+                "/playlists/" +
+                playlistID +
+                "/tracks?fields=items(track.id),total"
+            ),
+            headers={
+                "Accept": "application/json",
+                "Authorization": "Bearer " + access_token + "\""
+            }
+        )
         t = tracklist.json()
         total = t['total']
 
         # Get playlist name
         playlist = requests.get(
-            "https://api.spotify.com/v1/users/" + userName + "/playlists/" + playlistID + "?fields=name",
-            headers={"Authorization": "Bearer " + access_token})
+            (
+                "https://api.spotify.com/v1/users/" +
+                userName +
+                "/playlists/" +
+                playlistID +
+                "?fields=name"
+            ),
+            headers={"Authorization": "Bearer " + access_token}
+        )
         p = playlist.json()
         pname = p['name']
 
@@ -170,12 +228,25 @@ class AddToPlaylist(eg.ActionBase):
         offset = 100
         while (offset < total):
             tracklist = requests.get(
-                "https://api.spotify.com/v1/users/" + userName + "/playlists/" + playlistID + "/tracks?fields=items(track.id),total&offset=" + str(
-                    offset), headers={"Accept": "application/json", "Authorization": "Bearer " + access_token + "\""})
+                (
+                    "https://api.spotify.com/v1/users/" +
+                    userName +
+                    "/playlists/" +
+                    playlistID +
+                    "/tracks?fields=items(track.id),total&offset=" +
+                    str(offset)
+                ),
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + access_token + "\""
+                }
+            )
             t = tracklist.json()
             for i, song in enumerate(t['items']):
                 if song['track']['id'] == trackID:
-                    print "Duplicate found! Track was not added to the playlist."
+                    print (
+                        "Duplicate found! Track was not added to the playlist."
+                    )
                     return
             offset += 100
 
@@ -183,22 +254,59 @@ class AddToPlaylist(eg.ActionBase):
 
         # Add track to playlist
         add = requests.post(
-            "https://api.spotify.com/v1/users/" + userName + "/playlists/" + playlistID + "/tracks?uris=spotify%3Atrack%3A" + trackID,
-            headers={"Accept": "application/json", "Authorization": "Bearer " + access_token + "\""})
+            (
+                "https://api.spotify.com/v1/users/" +
+                userName +
+                "/playlists/" +
+                playlistID +
+                "/tracks?uris=spotify%3Atrack%3A" +
+                trackID
+            ),
+            headers={
+                "Accept": "application/json",
+                "Authorization": "Bearer " + access_token + "\""
+            }
+        )
 
         # Create OSD object
         osd = eg.plugins.EventGhost.actions["ShowOSD"]()
 
         # Exit with error if song couldn't be added to playlist
         if add.status_code != 201:
-            print ("POST ERROR: " + str(add.status_code) + " " + add.reason)
+            print "POST ERROR: " + str(add.status_code) + " " + add.reason
             osd("POST ERROR: " + str(add.status_code) + " " + add.reason)
             return
 
         # Show OSD if everything went well
-        osd("'" + trackArtist + " - " + trackName + "'" + " added to playlist " + pname + ".",
-            u'0;-16;0;0;0;700;0;0;0;0;3;2;1;34;Arial', (255, 255, 255), None, 3, (5, 37), 0, 3.0, True)
-        print "\"" + trackArtist + " - " + trackName + "\" added to playlist \"" + pname + "\"."
+        osd(
+            (
+                "'" +
+                trackArtist +
+                " - " +
+                trackName +
+                "'" +
+                " added to playlist " +
+                pname +
+                "."
+            ),
+            u'0;-16;0;0;0;700;0;0;0;0;3;2;1;34;Arial',
+            (255, 255, 255),
+            None,
+            3,
+            (5, 37),
+            0,
+            3.0,
+            True
+        )
+        print (
+            "\"" +
+            trackArtist +
+            " - " +
+            trackName +
+            "\" added to playlist \"" +
+            pname +
+            "\"."
+        )
 
         return
 
