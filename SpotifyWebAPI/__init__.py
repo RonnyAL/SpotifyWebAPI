@@ -223,7 +223,7 @@ class AddToPlaylist(eg.ActionBase):
 
         if refresh_token == None:
             self.PrintError("No refresh token found!")
-            refresh_token = getFirstAccessToken.__call__(getFirstAccessToken(), client_id, client_secret)
+            refresh_token = getFirstAccessToken.__call__(getFirstAccessToken())
 
         url = "https://accounts.spotify.com/api/token"
         payload = {"grant_type": "refresh_token", "refresh_token": refresh_token}
@@ -248,14 +248,9 @@ class getFirstAccessToken(eg.ActionBase):
         client_id = self.plugin.client_id
         client_secret = self.plugin.client_secret
 
-        print "client_id: " + client_id + "\nclient_secret: " + client_secret
-
-
         if access_code is None:
             self.PrintError("Failed to retrieve access code!")
             return
-
-        print "Access code: " + access_code
 
         print "Acquiring access and refresh tokens..."
 
@@ -266,24 +261,17 @@ class getFirstAccessToken(eg.ActionBase):
 
         r = requests.post(url, payload, headers=headers)
         json_string = r.content
-        print json_string
         parsed_json = json.loads(json_string)
-
-        print "Test2"
 
         if 'error' in parsed_json:
             self.PrintError("Error fetching access token: " + parsed_json['error_description'])
             return
 
-        # The next line produces an error, but access_token still prints shortly after!
         access_token = parsed_json['access_token']
-        # print "access_token: " + str(access_token)
         refresh_token = parsed_json['refresh_token']
-        # print "refresh_token: " + str(refresh_token)
 
         eg.plugins.Webserver.SetPersistentValue(u'spotify_access_token', str(access_token), False, False)
         eg.plugins.Webserver.SetPersistentValue(u'spotify_refresh_token', str(refresh_token), False, False)
-
         self.plugin.access_token = access_token
         self.plugin.refresh_token = refresh_token
 
@@ -294,16 +282,18 @@ class getFirstAccessToken(eg.ActionBase):
     def WriteLine(self, line, icon, when, wRef, indent):
         if icon == eg.Icons.EVENT_ICON and "HTTP.code=" in line:
             eg.log.RemoveLogListener(self)
-            a = line.split("code=", 1)
-            b = a[1]
-            access_code = b[:-3]
+            access_code = line.split("code=", 1)[1][:-3]
             print access_code
             self.getAccessToken(access_code)
 
 
     def __call__(self):
+        # The next line gives the error "AttributeError: 'NoneType' object has no attribute 'client_id'" if called from
+        # AddToPlaylist() - e.g. if you try to run the AddToPlaylist() action without manually getting the initial
+        # access token first. It does work however if you run the getFirstActionToken() action.
+
         client_id = self.plugin.client_id
-        client_secret = self.plugin.client_secret
+        # client_secret = self.plugin.client_secret # not really necessary here, I guess?
         scope = "playlist-read-private%20playlist-modify-public%20playlist-modify-private%20user-read-currently-playing%20user-modify-playback-state"
         redirect_uri = "http://localhost:8025"
         url = 'https://accounts.spotify.com/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + redirect_uri + "&scope=" + scope
