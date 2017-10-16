@@ -244,34 +244,36 @@ class getFirstAccessToken(eg.ActionBase):
     name = "Get initial access token"
     description = "Perform this once if you haven't acquired an access token yet."
 
-    def waitForCode(self, client_id, client_secret):
-        time_out = time.time() + 30
-        accessCode = None
+    def getAccessToken(self, access_code):
+        client_id = self.plugin.client_id
+        client_secret = self.plugin.client_secret
 
-        print "Attempting to acquire access code..."
+        print "client_id: " + client_id + "\nclient_secret: " + client_secret
 
-        while time_out > time.time():
-            if eg.event.prefix == "HTTP":
-                code = eg.event.suffix
-                accessCode = code.split("code=", 1)
-                break
 
-        if accessCode is None:
+        if access_code is None:
             self.PrintError("Failed to retrieve access code!")
             return
 
+        print "Access code: " + access_code
+
         print "Acquiring access and refresh tokens..."
-        # The commented out part below produces an error.
-        # client_id = self.plugin.client_id
-        # client_secret = self.plugin.client_secret
+
         url = 'https://accounts.spotify.com/api/token'
         redirect_uri = "http://localhost:8025"
-        payload = {"grant_type": "authorization_code", "code": str(accessCode[1]), "redirect_uri": redirect_uri}
+        payload = {"grant_type": "authorization_code", "code": access_code, "redirect_uri": redirect_uri}
         headers = {"Authorization": "Basic " + (base64.standard_b64encode(client_id + ":" + client_secret))}
 
         r = requests.post(url, payload, headers=headers)
         json_string = r.content
+        print json_string
         parsed_json = json.loads(json_string)
+
+        print "Test2"
+
+        if 'error' in parsed_json:
+            self.PrintError("Error fetching access token: " + parsed_json['error_description'])
+            return
 
         # The next line produces an error, but access_token still prints shortly after!
         access_token = parsed_json['access_token']
@@ -283,17 +285,27 @@ class getFirstAccessToken(eg.ActionBase):
         eg.plugins.Webserver.SetPersistentValue(u'spotify_refresh_token', str(refresh_token), False, False)
 
         self.plugin.access_token = access_token
-        self.plugin.refresh_token = access_token
+        self.plugin.refresh_token = refresh_token
 
         print "Successfully retrieved access and refresh tokens!"
 
-        return str(refresh_token)
+        #return str(refresh_token)
 
-    def __call__(self, client_id, client_secret):
+    def WriteLine(self, line, icon, when, wRef, indent):
+        if icon == eg.Icons.EVENT_ICON and "HTTP.code=" in line:
+            eg.log.RemoveLogListener(self)
+            a = line.split("code=", 1)
+            b = a[1]
+            access_code = b[:-3]
+            print access_code
+            self.getAccessToken(access_code)
+
+
+    def __call__(self):
+        client_id = self.plugin.client_id
+        client_secret = self.plugin.client_secret
         scope = "playlist-read-private%20playlist-modify-public%20playlist-modify-private%20user-read-currently-playing%20user-modify-playback-state"
         redirect_uri = "http://localhost:8025"
         url = 'https://accounts.spotify.com/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + redirect_uri + "&scope=" + scope
-        threadWaitForCode = threading.Thread(target=self.waitForCode, args=(client_id, client_secret))
-        output = threadWaitForCode.start()
+        eg.log.AddLogListener(self)
         os.startfile(url)
-        return str(output)
